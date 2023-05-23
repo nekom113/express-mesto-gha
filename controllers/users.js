@@ -7,13 +7,11 @@ const createUserProfile = (req, res) => {
     .then((user) => {
       res.send({ data: user });
     })
-    // eslint-disable-next-line consistent-return
     .catch((err) => {
       if (err.name === 'ValidationError') {
         return res.status(BAD_REQUEST_CODE).send({ massage: `Attention! Error ${BAD_REQUEST_CODE}. ${err.massage}` });
-      }
-    })
-    .catch((err) => res.status(INTERNAL_SERVER_ERROR_CODE).send({ message: `Attention! Error ${INTERNAL_SERVER_ERROR_CODE}. ${err.massage}` }));
+      } return res.status(INTERNAL_SERVER_ERROR_CODE).send({ message: `Attention! Error ${INTERNAL_SERVER_ERROR_CODE}` });
+    });
 };
 
 const getUsers = (req, res) => {
@@ -29,13 +27,11 @@ const getUserId = (req, res) => {
         _id: user.id, name: user.name, about: user.about, link: user.avatar,
       });
     })
-    // eslint-disable-next-line consistent-return
     .catch((err) => {
       if (err.name === 'CastError') {
         return res.status(BAD_REQUEST_CODE).send({ message: `Attention! Error ${BAD_REQUEST_CODE}. This user is not found` });
-      }
-    })
-    .catch((err) => res.status(INTERNAL_SERVER_ERROR_CODE).send({ message: `Attention! Error ${INTERNAL_SERVER_ERROR_CODE}. ${err.massage}` }));
+      } return res.status(INTERNAL_SERVER_ERROR_CODE).send({ message: `Attention! Error ${INTERNAL_SERVER_ERROR_CODE}` });
+    });
 };
 
 const userProfileUpdate = (req, res) => {
@@ -52,7 +48,7 @@ const userProfileUpdate = (req, res) => {
       if (!user) {
         return res.status(NOT_FOUND_ERROR_CODE).send({ message: 'This profile is not found' });
       }
-      res.send({
+      return res.send({
         _id: user.id, name: user.name, about: user.about, link: user.avatar,
       });
     })
@@ -78,7 +74,7 @@ const userAvatarUpdate = (req, res) => {
       if (!user) {
         return res.status(NOT_FOUND_ERROR_CODE).send({ message: 'This profile is not found' });
       }
-      res.send({
+      return res.send({
         _id: user.id, name: user.name, about: user.about, link: user.avatar,
       });
     })

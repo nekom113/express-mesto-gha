@@ -11,7 +11,7 @@ const createUserProfile = (req, res) => {
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return res.status(BAD_REQUEST_CODE).send({ massage: `Attention! Error ${BAD_REQUEST_CODE}. Does not pass validation` });
+        return res.status(BAD_REQUEST_CODE).send({ massage: 'Does not pass validation' });
       } return res.status(INTERNAL_SERVER_ERROR_CODE).send({ message: `Attention! Error ${INTERNAL_SERVER_ERROR_CODE}.` });
     });
 };

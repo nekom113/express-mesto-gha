@@ -1,6 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const router = require('./routes');
+const { NOT_FOUND_ERROR_CODE } = require('./utils/status_codes');
 
 const app = express();
 
@@ -17,17 +18,14 @@ start();
 
 app.use((req, res, next) => {
   req.user = {
-    // _id: '645a69785d81b2a236ef3401',
-    // _id: '646540731beae019b7534e68',
     _id: '64653bad8288409d37874371',
-
   };
   next();
 });
 
 app.use('/', router);
 app.use((req, res) => {
-  res.status(404).send({ message: 'Page is not found' });
+  res.status(NOT_FOUND_ERROR_CODE).send({ message: 'Page is not found' });
 });
 
 app.listen(PORT, console.log(`Server is working on PORT: ${PORT}`));

@@ -5,8 +5,6 @@ const cardSchema = new mongoose.Schema(
     name: {
       type: String,
       required: true,
-      // maxlength: [30, 'Line length more 30 symbols']
-      // minlength: [2, 'Line length less 2 symbols']
       maxlength: 30,
       minlength: 2,
     },
@@ -28,7 +26,6 @@ const cardSchema = new mongoose.Schema(
       default: Date.now,
     },
   },
-  { versionKey: false },
 );
 
 module.exports = mongoose.model('card', cardSchema);

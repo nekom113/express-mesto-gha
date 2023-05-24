@@ -15,7 +15,7 @@ const createUserProfile = (req, res) => {
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return res.status(BAD_REQUEST_CODE).send({ massage: 'Does not pass validation' });
+        return res.status(BAD_REQUEST_CODE).send({ message: 'Does not pass validation' });
       } return res.status(INTERNAL_SERVER_ERROR_CODE).send({ message: `Attention! Error ${INTERNAL_SERVER_ERROR_CODE}. Internal Server Error` });
     });
 };
@@ -23,7 +23,7 @@ const createUserProfile = (req, res) => {
 const getUsers = (req, res) => {
   User.find({})
     .then((user) => res.status(STATUS_CODE_OK).send({ user }))
-    .catch((err) => res.status(INTERNAL_SERVER_ERROR_CODE).send({ message: `Attention! Error ${INTERNAL_SERVER_ERROR_CODE}. ${err.massage}` }));
+    .catch((err) => res.status(INTERNAL_SERVER_ERROR_CODE).send({ message: `Attention! Error ${INTERNAL_SERVER_ERROR_CODE}. ${err.message}` }));
 };
 
 const getUserId = (req, res) => {
@@ -60,7 +60,7 @@ const userProfileUpdate = (req, res) => {
       if (err.name === 'CastError' || err.name === 'ValidationError') {
         return res.status(BAD_REQUEST_CODE).send({ message: `Attention! Error ${BAD_REQUEST_CODE}. Does not pass validation` });
       }
-      return res.status(INTERNAL_SERVER_ERROR_CODE).send({ message: `Attention! Error ${INTERNAL_SERVER_ERROR_CODE}. ${err.massage}` });
+      return res.status(INTERNAL_SERVER_ERROR_CODE).send({ message: `Attention! Error ${INTERNAL_SERVER_ERROR_CODE}. ${err.message}` });
     });
 };
 
@@ -82,10 +82,10 @@ const userAvatarUpdate = (req, res) => {
     })
     .catch((err) => {
       if (err.name === 'CastError' || err.name === 'ValidationError') {
-        return res.status(BAD_REQUEST_CODE).send({ message: `Attention! Error ${BAD_REQUEST_CODE}. ${err.massage}` });
+        return res.status(BAD_REQUEST_CODE).send({ message: `Attention! Error ${BAD_REQUEST_CODE}. ${err.message}` });
       }
       return res.status(INTERNAL_SERVER_ERROR_CODE).send({
-        message: `Attention! Error ${INTERNAL_SERVER_ERROR_CODE}. ${err.massage}`,
+        message: `Attention! Error ${INTERNAL_SERVER_ERROR_CODE}. ${err.message}`,
       });
     });
 };

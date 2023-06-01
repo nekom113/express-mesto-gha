@@ -15,13 +15,6 @@ const start = async () => {
 };
 start();
 
-app.use((req, res, next) => {
-  req.user = {
-    _id: '64653bad8288409d37874371',
-  };
-  next();
-});
-
 app.use('/', router);
 
 app.listen(PORT, console.log(`Server is working on PORT: ${PORT}`));

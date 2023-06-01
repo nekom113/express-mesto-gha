@@ -1,6 +1,6 @@
 const express = require('express');
 const {
-  getUsers, createUserProfile, getUserId, userProfileUpdate, userAvatarUpdate,
+  getUsers, userProfileUpdate, userAvatarUpdate, getCurrentUser,
 } = require('../controllers/users');
 
 const userRouter = express.Router();
@@ -8,8 +8,8 @@ const userRouter = express.Router();
 userRouter.use(express.json());
 
 userRouter.get('/', getUsers);
-userRouter.get('/:userId', getUserId);
-userRouter.post('/', createUserProfile);
+userRouter.get('/me', getCurrentUser);
+
 userRouter.patch('/me', userProfileUpdate);
 userRouter.patch('/me/avatar', userAvatarUpdate);
 

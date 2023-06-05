@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const { celebrate, Joi } = require('celebrate');
-const { urlRegex } = require('../utils/status_codes');
+const { urlRegex } = require('../utils/utils');
 
 const idValidation = (value, helper) => {
   if (mongoose.isValidObjectId(value)) {

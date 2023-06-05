@@ -1,8 +1,10 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const { errors } = require('celebrate');
+const helmet = require('helmet');
 const router = require('./routes');
 const { errorHandler } = require('./middlewares/error_handler');
+const { limiter } = require('./utils/utils');
 
 const app = express();
 
@@ -20,5 +22,7 @@ start();
 app.use('/', router);
 app.use(errors());
 app.use(errorHandler);
+app.use(helmet());
+app.use(limiter);
 
 app.listen(PORT, console.log(`Server is working on PORT: ${PORT}`));

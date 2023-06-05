@@ -30,6 +30,7 @@ const createUserProfile = (req, res, next) => {
     res.status(STATUS_CODE_CREATED.code).send(newUserProfile);
   })
     .catch((err) => {
+      console.log({ err });
       if (err.name === 'ValidationError') {
         return new BadRequestError(BAD_REQUEST_CODE.message);
       }
@@ -119,12 +120,16 @@ const login = (req, res, next) => {
     .select('+password')
     .then((user) => {
       if (!user) {
-        return next(new UnauthorizedError(UNAUTHORIZED_ERROR_CODE.message));
+        return next(
+          new UnauthorizedError(UNAUTHORIZED_ERROR_CODE.messages.incorrectEmailOrPassword),
+        );
       }
       return bcrypt.compare(password, user.password)
         .then((matched) => {
           if (!matched) {
-            return next(new UnauthorizedError(UNAUTHORIZED_ERROR_CODE.message));
+            return next(
+              new UnauthorizedError(UNAUTHORIZED_ERROR_CODE.messages.incorrectEmailOrPassword),
+            );
           }
           const token = jwt.sign({ _id: user._id }, 'SECRET_KEY', { expiresIn: '1d' });
           return res.status(STATUS_CODE_OK.code).send({ token });

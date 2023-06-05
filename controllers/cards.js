@@ -29,10 +29,10 @@ const getCards = (req, res, next) => {
 };
 
 const deleteCard = (req, res, next) => {
-  Card.findByIdAndDelete(req.params.cardId)
+  Card.findById(req.params.cardId)
     .then((card) => {
       if (!card) {
-        return next(new NotFoundError('Не работает блять!'));
+        return next(new NotFoundError(NOT_FOUND_ERROR_CODE.messages.cardIsNotFound));
       }
       if (card.owner._id.toString() !== req.user._id) {
         return next(new ForbiddenError(FORBIDDEN_ERROR_CODE.message));

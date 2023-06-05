@@ -6,7 +6,9 @@ const authToken = (req, res, next) => {
   const { authorization } = req.headers;
 
   if (!authorization || !authorization.startsWith('Bearer ')) {
-    next(new UnauthorizedError(UNAUTHORIZED_ERROR_CODE.message));
+    next(
+      new UnauthorizedError(UNAUTHORIZED_ERROR_CODE.messages.authorizationError),
+    );
   }
   const token = authorization.replace('Bearer ', '');
   let payload;

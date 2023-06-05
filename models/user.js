@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
-const { urlRegex } = require('../utils/status_codes');
+const { urlRegex } = require('../utils/utils');
 
 const userSchema = new mongoose.Schema(
   {
@@ -28,8 +28,8 @@ const userSchema = new mongoose.Schema(
     },
     email: {
       type: String,
-      unique: true,
       require: true,
+      unique: true,
       validate: {
         validator(v) {
           return validator.isEmail(v);
@@ -40,7 +40,6 @@ const userSchema = new mongoose.Schema(
     password: {
       type: String,
       select: false,
-      minlength: 6,
       required: true,
     },
   },

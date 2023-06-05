@@ -1,13 +1,12 @@
 const express = require('express');
 const mongoose = require('mongoose');
-// const cookieParser = require('cookie-parser');
 const { errors } = require('celebrate');
 const router = require('./routes');
 const { errorHandler } = require('./middlewares/error_handler');
 
 const app = express();
 
-const { PORT = 3003 } = process.env;
+const { PORT = 3000 } = process.env;
 
 const start = async () => {
   try {
@@ -19,8 +18,6 @@ const start = async () => {
 start();
 
 app.use('/', router);
-// app.use(cookieParser);
-// app.use(express.json());
 app.use(errors());
 app.use(errorHandler);
 

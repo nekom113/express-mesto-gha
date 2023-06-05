@@ -59,6 +59,16 @@ module.exports.getCurrentUserValidation = celebrate({
         .custom(idValidation),
     }),
 });
+module.exports.getUserByIdValidation = celebrate({
+  params: Joi
+    .object()
+    .keys({
+      userId: Joi
+        .string()
+        .required()
+        .custom(idValidation),
+    }),
+});
 
 module.exports.userProfileUpdateValidation = celebrate({
   body: Joi

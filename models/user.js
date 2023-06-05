@@ -8,17 +8,17 @@ const userSchema = new mongoose.Schema(
       type: String,
       maxlength: 30,
       minlength: 2,
-      default: 'King Kat',
+      default: 'Жак-Ив Кусто',
     },
     about: {
       type: String,
       maxlength: 30,
       minlength: 2,
-      default: 'Just King',
+      default: 'Исследователь',
     },
     avatar: {
       type: String,
-      default: 'https://ae04.alicdn.com/kf/HTB1YNgVL5LaK1RjSZFxq6ymPFXam.jpg',
+      default: 'https://pictures.s3.yandex.net/resources/jacques-cousteau_1604399756.png',
       validate: {
         validator(v) {
           return urlRegex.test(v);
@@ -40,6 +40,7 @@ const userSchema = new mongoose.Schema(
     password: {
       type: String,
       select: false,
+      minlength: 6,
       required: true,
     },
   },

@@ -25,7 +25,9 @@ const createUserProfile = (req, res, next) => {
     email,
     password: hash,
   })).then((user) => {
-    res.status(STATUS_CODE_CREATED.code).send({ user });
+    const newUserProfile = user.toObject();
+    delete newUserProfile.password;
+    res.status(STATUS_CODE_CREATED.code).send(newUserProfile);
   })
     .catch((err) => {
       if (err.name === 'ValidationError') {
@@ -48,7 +50,7 @@ const getCurrentUser = (req, res, next) => {
     .then((user) => res.send(user))
     .catch((err) => next(err));
 };
-const getUserId = (req, res, next) => {
+const getUserById = (req, res, next) => {
   User.findById(req.params.userId)
     .then((user) => {
       if (!user) {
@@ -133,7 +135,7 @@ const login = (req, res, next) => {
 module.exports = {
   getUsers,
   createUserProfile,
-  getUserId,
+  getUserById,
   userProfileUpdate,
   userAvatarUpdate,
   login,

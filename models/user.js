@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
+const { urlRegex } = require('../utils/status_codes');
 
 const userSchema = new mongoose.Schema(
   {
@@ -20,9 +21,9 @@ const userSchema = new mongoose.Schema(
       default: 'https://ae04.alicdn.com/kf/HTB1YNgVL5LaK1RjSZFxq6ymPFXam.jpg',
       validate: {
         validator(v) {
-          return validator.isURL(v);
+          return urlRegex.test(v);
         },
-        message: 'URL is not correct.',
+        message: 'Url is not correct.',
       },
     },
     email: {
@@ -38,7 +39,7 @@ const userSchema = new mongoose.Schema(
     },
     password: {
       type: String,
-      // select: false,
+      select: false,
       required: true,
     },
   },

@@ -2,15 +2,19 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 const {
-  STATUS_CODE_OK,
   STATUS_CODE_CREATED,
   BAD_REQUEST_CODE,
+  DUPLICATE_DATA_ERROR_CODE,
+  STATUS_CODE_OK,
   NOT_FOUND_ERROR_CODE,
-  INTERNAL_SERVER_ERROR_CODE,
+  UNAUTHORIZED_ERROR_CODE,
 } = require('../utils/status_codes');
+const BadRequestError = require('../utils/error_types/badRequestError');
+const DuplicateDataError = require('../utils/error_types/duplicateError');
+const NotFoundError = require('../utils/error_types/notFoundError');
+const UnauthorizedError = require('../utils/error_types/unauthorizedError');
 
-const createUserProfile = (req, res) => {
-  console.log({ req });
+const createUserProfile = (req, res, next) => {
   const {
     about, name, avatar, email, password,
   } = req.body;
@@ -21,40 +25,44 @@ const createUserProfile = (req, res) => {
     email,
     password: hash,
   })).then((user) => {
-    res.status(STATUS_CODE_CREATED).send({ user });
+    res.status(STATUS_CODE_CREATED.code).send({ user });
   })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return res.status(BAD_REQUEST_CODE).send({ message: 'Does not pass validation' });
-      } return res.status(INTERNAL_SERVER_ERROR_CODE).send({ message: `Attention! Error ${INTERNAL_SERVER_ERROR_CODE}. Internal Server Error ${err}` });
+        return new BadRequestError(BAD_REQUEST_CODE.message);
+      }
+      if (err.code === 11000) {
+        return next(new DuplicateDataError(DUPLICATE_DATA_ERROR_CODE.message));
+      }
+      return next(err);
     });
 };
 
-const getUsers = (req, res) => {
+const getUsers = (req, res, next) => {
   User.find({})
-    .then((user) => res.status(STATUS_CODE_OK).send({ user }))
-    .catch((err) => res.status(INTERNAL_SERVER_ERROR_CODE).send({ message: `Attention! Error ${INTERNAL_SERVER_ERROR_CODE}. ${err.message}` }));
+    .then((user) => res.status(STATUS_CODE_OK.code).send({ user }))
+    .catch(next);
 };
 const getCurrentUser = (req, res, next) => {
   User.findById(req.user._id)
     .then((user) => res.send(user))
     .catch((err) => next(err));
 };
-const getUserId = (req, res) => {
+const getUserId = (req, res, next) => {
   User.findById(req.params.userId)
     .then((user) => {
       if (!user) {
-        return res.status(NOT_FOUND_ERROR_CODE).send({ message: `Attention! Error ${NOT_FOUND_ERROR_CODE}. This is user is not found` });
+        return next(new NotFoundError(NOT_FOUND_ERROR_CODE.messages.userIsNotFound));
       }
-      return res.status(STATUS_CODE_OK).send({ user });
+      return res.status(STATUS_CODE_OK.code).send({ user });
     }).catch((err) => {
       if (err.name === 'CastError') {
-        return res.status(BAD_REQUEST_CODE).send({ message: `Attention! Error ${BAD_REQUEST_CODE}. This user is not found` });
-      } return res.status(INTERNAL_SERVER_ERROR_CODE).send({ message: `Attention! Error ${INTERNAL_SERVER_ERROR_CODE}` });
+        return new BadRequestError(BAD_REQUEST_CODE.message);
+      } return next(err);
     });
 };
 
-const userProfileUpdate = (req, res) => {
+const userProfileUpdate = (req, res, next) => {
   const { name, about } = req.body;
   User.findOneAndUpdate(
     { _id: req.user._id },
@@ -66,19 +74,19 @@ const userProfileUpdate = (req, res) => {
   )
     .then((user) => {
       if (!user) {
-        return res.status(NOT_FOUND_ERROR_CODE).send({ message: 'This profile is not found' });
+        return next(new NotFoundError(NOT_FOUND_ERROR_CODE.messages.userIsNotFound));
       }
-      return res.status(STATUS_CODE_OK).send({ user });
+      return res.status(STATUS_CODE_OK.code).send({ user });
     })
     .catch((err) => {
       if (err.name === 'CastError' || err.name === 'ValidationError') {
-        return res.status(BAD_REQUEST_CODE).send({ message: `Attention! Error ${BAD_REQUEST_CODE}. Does not pass validation` });
+        return new BadRequestError(BAD_REQUEST_CODE.message);
       }
-      return res.status(INTERNAL_SERVER_ERROR_CODE).send({ message: `Attention! Error ${INTERNAL_SERVER_ERROR_CODE}. ${err.message}` });
+      return next(err);
     });
 };
 
-const userAvatarUpdate = (req, res) => {
+const userAvatarUpdate = (req, res, next) => {
   const { avatar } = req.body;
   User.findOneAndUpdate(
     { _id: req.user._id },
@@ -90,17 +98,15 @@ const userAvatarUpdate = (req, res) => {
   )
     .then((user) => {
       if (!user) {
-        return res.status(NOT_FOUND_ERROR_CODE).send({ message: 'This profile is not found' });
+        return next(new NotFoundError(NOT_FOUND_ERROR_CODE.messages.userIsNotFound));
       }
-      return res.status(STATUS_CODE_OK).send({ user });
+      return res.status(STATUS_CODE_OK.code).send({ user });
     })
     .catch((err) => {
       if (err.name === 'CastError' || err.name === 'ValidationError') {
-        return res.status(BAD_REQUEST_CODE).send({ message: `Attention! Error ${BAD_REQUEST_CODE}. ${err.message}` });
+        return new BadRequestError(BAD_REQUEST_CODE.message);
       }
-      return res.status(INTERNAL_SERVER_ERROR_CODE).send({
-        message: `Attention! Error ${INTERNAL_SERVER_ERROR_CODE}. ${err.message}`,
-      });
+      return next(err);
     });
 };
 
@@ -108,28 +114,21 @@ const login = (req, res, next) => {
   const { email, password } = req.body;
 
   User.findOne({ email })
+    .select('+password')
     .then((user) => {
       if (!user) {
-        res.status(401).send({ message: 'Неправильные почта или пароль' });
-        next();
+        return next(new UnauthorizedError(UNAUTHORIZED_ERROR_CODE.message));
       }
-      bcrypt.compare(password, user.password)
+      return bcrypt.compare(password, user.password)
         .then((matched) => {
           if (!matched) {
-            res.status(401).send({ message: 'Неправильные почта или пароль' });
-            next();
+            return next(new UnauthorizedError(UNAUTHORIZED_ERROR_CODE.message));
           }
           const token = jwt.sign({ _id: user._id }, 'SECRET_KEY', { expiresIn: '1d' });
-          // res.cookie('Bearer ', token, {
-          //   maxAge: 360000 * 24 * 7,
-          //   httpOnly: true,
-          //   sameSite: true,
-          // });
-          return res.status(200).send({ token });
-          // return res.status(200).send({ data: user.toJSON() });
+          return res.status(STATUS_CODE_OK.code).send({ token });
         });
     })
-    .catch((err) => res.status(401).send({ message: `Что-то не так!!! ${err.message}` }));
+    .catch(next);
 };
 module.exports = {
   getUsers,

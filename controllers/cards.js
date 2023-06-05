@@ -1,48 +1,52 @@
 const Card = require('../models/card');
+const BadRequestError = require('../utils/error_types/badRequestError');
+const ForbiddenError = require('../utils/error_types/forbiddenError');
+const NotFoundError = require('../utils/error_types/notFoundError');
 const {
-  STATUS_CODE_OK,
-  STATUS_CODE_CREATED,
-  BAD_REQUEST_CODE, NOT_FOUND_ERROR_CODE,
-  INTERNAL_SERVER_ERROR_CODE,
+  BAD_REQUEST_CODE, STATUS_CODE_CREATED, STATUS_CODE_OK, NOT_FOUND_ERROR_CODE, FORBIDDEN_ERROR_CODE,
 } = require('../utils/status_codes');
 
-const createCard = (req, res) => {
+const createCard = (req, res, next) => {
   const { name, link } = req.body;
   Card.create({ name, link, owner: req.user._id })
     .then((card) => {
-      res.status(STATUS_CODE_CREATED).send({ card });
+      res.status(STATUS_CODE_CREATED.code).send({ card });
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return res.status(BAD_REQUEST_CODE).send({ message: `Attention! Error ${BAD_REQUEST_CODE}. ${err.message}` });
-      } return res.status(INTERNAL_SERVER_ERROR_CODE).send({ message: `Attention! Error ${INTERNAL_SERVER_ERROR_CODE}. ${err.message}` });
+        return next(new BadRequestError(BAD_REQUEST_CODE.message));
+      }
+      return next(err);
     });
 };
 
-const getCards = (req, res) => {
+const getCards = (req, res, next) => {
   Card.find({})
     .then((card) => {
-      res.status(STATUS_CODE_OK)
+      res.status(STATUS_CODE_OK.code)
         .send({ card });
-    }).catch((err) => res.status(INTERNAL_SERVER_ERROR_CODE).send({ message: `Attention! Error ${INTERNAL_SERVER_ERROR_CODE}. ${err.message}` }));
+    }).catch(next);
 };
 
-const deleteCard = (req, res) => {
+const deleteCard = (req, res, next) => {
   Card.findByIdAndDelete(req.params.cardId)
     .then((card) => {
       if (!card) {
-        return res.status(NOT_FOUND_ERROR_CODE).send({ message: `Attention! Error ${NOT_FOUND_ERROR_CODE}. This is card is not found` });
+        return next(new NotFoundError('Не работает блять!'));
       }
-      return res.status(STATUS_CODE_OK).send({ card });
+      if (card.owner._id.toString() !== req.user._id) {
+        return next(new ForbiddenError(FORBIDDEN_ERROR_CODE.message));
+      }
+      return res.status(STATUS_CODE_OK.code).send({ card });
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        return res.status(BAD_REQUEST_CODE).send({ message: `Attention! Error ${BAD_REQUEST_CODE}. ${err.message}` });
-      } return res.status(INTERNAL_SERVER_ERROR_CODE).send({ message: `Attention! Error ${INTERNAL_SERVER_ERROR_CODE}. ${err.message}` });
+        return next(new BadRequestError(BAD_REQUEST_CODE.message));
+      } return next(err);
     });
 };
 
-const likeCard = (req, res) => {
+const likeCard = (req, res, next) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $addToSet: { likes: req.user._id } },
@@ -50,17 +54,18 @@ const likeCard = (req, res) => {
   )
     .then((card) => {
       if (!card) {
-        return res.status(NOT_FOUND_ERROR_CODE).send({ message: `Attention! Error ${NOT_FOUND_ERROR_CODE}. This is card is not found` });
+        return next(new NotFoundError(NOT_FOUND_ERROR_CODE.messages.cardIsNotFound));
       }
-      return res.status(STATUS_CODE_OK).send({ card });
+      return res.status(STATUS_CODE_OK.code).send({ card });
     }).catch((err) => {
       if (err.name === 'CastError') {
-        return res.status(BAD_REQUEST_CODE).send({ message: `Attention! Error ${BAD_REQUEST_CODE}. ${err.message}` });
-      } return res.status(INTERNAL_SERVER_ERROR_CODE).send({ message: `Attention! Error ${INTERNAL_SERVER_ERROR_CODE}. ${err.message}` });
+        return next(new BadRequestError(BAD_REQUEST_CODE.message));
+      }
+      return next(err);
     });
 };
 
-const dislikeCard = (req, res) => {
+const dislikeCard = (req, res, next) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $pull: { likes: req.user._id } },
@@ -68,15 +73,15 @@ const dislikeCard = (req, res) => {
   )
     .then((card) => {
       if (!card) {
-        return res.status(NOT_FOUND_ERROR_CODE).send({ message: `Attention! Error ${NOT_FOUND_ERROR_CODE}. This is card is not found` });
+        return next(new NotFoundError(NOT_FOUND_ERROR_CODE.messages.cardIsNotFound));
       }
-      return res.status(STATUS_CODE_OK)
+      return res.status(STATUS_CODE_OK.code)
         .send({ card });
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        return res.status(BAD_REQUEST_CODE).send({ message: `Attention! Error ${BAD_REQUEST_CODE}. ${err.message}` });
-      } return res.status(INTERNAL_SERVER_ERROR_CODE).send({ message: `Attention! Error ${INTERNAL_SERVER_ERROR_CODE}. ${err.message}` });
+        return next(new BadRequestError(BAD_REQUEST_CODE.message));
+      } return next(err);
     });
 };
 

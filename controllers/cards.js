@@ -37,7 +37,9 @@ const deleteCard = (req, res, next) => {
       if (card.owner._id.toString() !== req.user._id) {
         return next(new ForbiddenError(FORBIDDEN_ERROR_CODE.message));
       }
-      return res.status(STATUS_CODE_OK.code).send({ card });
+      return Card.deleteOne(card).then(
+        res.status(STATUS_CODE_OK.code).send({ card }),
+      );
     })
     .catch((err) => {
       if (err.name === 'CastError') {

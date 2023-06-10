@@ -27,7 +27,7 @@ const createUserProfile = (req, res, next) => {
   })).then((user) => {
     const newUserProfile = user.toObject();
     delete newUserProfile.password;
-    res.status(STATUS_CODE_CREATED.code).send(newUserProfile);
+    return res.status(STATUS_CODE_CREATED.code).send(newUserProfile);
   })
     .catch((err) => {
       console.log({ err });
